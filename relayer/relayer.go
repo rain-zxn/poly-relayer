@@ -66,7 +66,7 @@ type IChainSubmitter interface {
 
 func GetListener(chain uint64) (listener IChainListener) {
 	switch chain {
-	case base.ONT:
+	case uint64(5555):
 		listener = new(ont.Listener)
 	case base.POLY:
 		listener = new(po.Listener)
@@ -77,7 +77,7 @@ func GetListener(chain uint64) (listener IChainListener) {
 
 func GetSubmitter(chain uint64) (submitter IChainSubmitter) {
 	switch chain {
-	case base.ONT:
+	case uint64(5555):
 		submitter = new(ont.Submitter)
 	default:
 	}

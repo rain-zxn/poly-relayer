@@ -89,7 +89,7 @@ func (s *Submitter) ComposeTx(tx *msg.Tx) (err error) {
 	if tx.PolyHash == "" {
 		return fmt.Errorf("ComposeTx: Invalid poly hash")
 	}
-	if tx.DstPolyEpochStartHeight == 0 && tx.DstChainId != base.ONT {
+	if tx.DstPolyEpochStartHeight == 0 && tx.DstChainId != uint64(5555) {
 		return fmt.Errorf("ComposeTx: Dst chain poly height not specified")
 	}
 
@@ -104,7 +104,7 @@ func (s *Submitter) ComposeTx(tx *msg.Tx) (err error) {
 		return err
 	}
 
-	if tx.DstChainId != base.ONT {
+	if tx.DstChainId != uint64(5555) {
 		err = s.ComposePolyHeaderProof(tx)
 		if err != nil {
 			return
@@ -127,7 +127,7 @@ func (s *Submitter) ComposeTx(tx *msg.Tx) (err error) {
 	tx.SrcProxy = common.BytesToAddress(tx.MerkleValue.MakeTxParam.FromContractAddress).String()
 	tx.DstProxy = common.BytesToAddress(tx.MerkleValue.MakeTxParam.ToContractAddress).String()
 
-	if tx.DstChainId != base.ONT {
+	if tx.DstChainId != uint64(5555) {
 		return s.CollectSigs(tx)
 	}
 	return

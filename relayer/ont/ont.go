@@ -54,7 +54,7 @@ func (s *Submitter) Init(config *config.SubmitterConfig) (err error) {
 	s.config = config
 	s.signer, err = wallet.NewOntSigner(config.Wallet)
 	s.name = base.GetChainName(config.ChainId)
-	s.sdk, err = ont.WithOptions(base.ONT, config.Nodes, time.Minute, 1)
+	s.sdk, err = ont.WithOptions(uint64(5555), config.Nodes, time.Minute, 1)
 	if err != nil {
 		return
 	}

@@ -47,7 +47,7 @@ type Listener struct {
 }
 
 func (l *Listener) Init(config *config.ListenerConfig, poly *poly.SDK) (err error) {
-	if config.ChainId != base.ONT {
+	if config.ChainId != uint64(5555) {
 		return fmt.Errorf("ONT chain id is incorrect in config %v", config.ChainId)
 	}
 	l.config = config
@@ -75,7 +75,7 @@ func (l *Listener) Compose(tx *msg.Tx) (err error) {
 	if tx.SrcHeight == 0 {
 		return fmt.Errorf("Invalid tx src height(0)")
 	}
-	v, _ := l.poly.Node().GetSideChainMsg(base.ONT, tx.SrcHeight)
+	v, _ := l.poly.Node().GetSideChainMsg(uint64(5555), tx.SrcHeight)
 	if len(v) == 0 {
 		msg, err := l.sdk.Node().GetCrossChainMsg(uint32(tx.SrcHeight))
 		if err != nil {
@@ -155,7 +155,7 @@ func (l *Listener) Scan(height uint64) (txs []*msg.Tx, err error) {
 				TxId:       states[4].(string),
 				TxType:     msg.SRC,
 				SrcHeight:  height,
-				SrcChainId: base.ONT,
+				SrcChainId: uint64(5555),
 				SrcHash:    event.TxHash,
 				DstChainId: uint64(states[2].(float64)),
 			}
@@ -207,12 +207,12 @@ func (l *Listener) LastHeaderSync(force, last uint64) (height uint64, err error)
 	if force != 0 {
 		return force, nil
 	}
-	height, err = l.poly.Node().GetSideChainMsgHeight(base.ONT)
+	height, err = l.poly.Node().GetSideChainMsgHeight(uint64(5555))
 	if err != nil {
 		return
 	}
 	if height == 0 {
-		height, err = l.poly.Node().GetSideChainHeight(base.ONT)
+		height, err = l.poly.Node().GetSideChainHeight(uint64(5555))
 	}
 	if last > height {
 		height = last
