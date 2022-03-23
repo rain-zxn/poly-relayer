@@ -239,6 +239,7 @@ func (l *Listener) Scan(height uint64) (txs []*msg.Tx, err error) {
 	}
 	flag := 0
 	txs = []*msg.Tx{}
+	l.ccm = "30d4e2cf64d5d8f9da4dd7f094c6c01f3aa2d434"
 	for _, event0 := range events {
 		fmt.Println("event hash:", event0.TxHash)
 		for _, notify := range event0.Notify {
