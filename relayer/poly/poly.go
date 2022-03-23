@@ -223,13 +223,14 @@ func (s *Submitter) submit(tx *msg.Tx) error {
 			return nil
 		}
 	}
+	fmt.Println("***********************")
 	fmt.Println("tx.SrcChainId:", tx.SrcChainId)
-	fmt.Println("tx.SrcChainId:", hex.EncodeToString(tx.SrcEvent)) //
-	fmt.Println("tx.SrcChainId:", uint32(tx.SrcProofHeight))       //
-	fmt.Println("tx.SrcChainId:", hex.EncodeToString(tx.SrcProof))
-	fmt.Println("tx.SrcChainId:", hex.EncodeToString(account))
-	fmt.Println("tx.SrcChainId:", hex.EncodeToString(tx.SrcStateRoot))
-	fmt.Println("tx.SrcChainId:", s.signer.Address)
+	fmt.Println("tx.SrcEvent:", hex.EncodeToString(tx.SrcEvent)) //
+	fmt.Println("tx.SrcProofHeight:", uint32(tx.SrcProofHeight)) //
+	fmt.Println("tx.SrcProof:", hex.EncodeToString(tx.SrcProof))
+	fmt.Println("tx.account:", hex.EncodeToString(account))
+	fmt.Println("tx.SrcStateRoot:", hex.EncodeToString(tx.SrcStateRoot))
+	fmt.Println("tx.signer:", s.signer.Address)
 
 	t, err := s.sdk.Node().Native.Ccm.ImportOuterTransfer(
 		tx.SrcChainId,

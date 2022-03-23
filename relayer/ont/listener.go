@@ -151,26 +151,35 @@ func (l *Listener) Compose(tx *msg.Tx) (err error) {
 	}
 	fmt.Println("string(path):", ontocommon.ToHexString(path))
 	tx.SrcProof = path
-	{
-		value, _, _, _ := msg.ParseAuditPath(tx.SrcProof)
-		if len(value) == 0 {
-			return fmt.Errorf("ParseAuditPath got null param")
-		}
-		param := &ccom.MakeTxParam{}
-		err = param.Deserialization(ontocommon.NewZeroCopySource(value))
-		if err != nil {
-			return
-		}
-		tx.Param = &pcom.MakeTxParam{
-			TxHash:              param.TxHash,
-			CrossChainID:        param.CrossChainID,
-			FromContractAddress: param.FromContractAddress,
-			ToChainID:           param.ToChainID,
-			ToContractAddress:   param.ToContractAddress,
-			Method:              param.Method,
-			Args:                param.Args,
-		}
+	tx.Param = &pcom.MakeTxParam{
+		TxHash:              param.TxHash,
+		CrossChainID:        param.CrossChainID,
+		FromContractAddress: param.FromContractAddress,
+		ToChainID:           param.ToChainID,
+		ToContractAddress:   param.ToContractAddress,
+		Method:              param.Method,
+		Args:                param.Args,
 	}
+	//{
+	//	value, _, _, _ := msg.ParseAuditPath(tx.SrcProof)
+	//	if len(value) == 0 {
+	//		return fmt.Errorf("ParseAuditPath got null param")
+	//	}
+	//	param := &ccom.MakeTxParam{}
+	//	err = param.Deserialization(ontocommon.NewZeroCopySource(value))
+	//	if err != nil {
+	//		return
+	//	}
+	//	tx.Param = &pcom.MakeTxParam{
+	//		TxHash:              param.TxHash,
+	//		CrossChainID:        param.CrossChainID,
+	//		FromContractAddress: param.FromContractAddress,
+	//		ToChainID:           param.ToChainID,
+	//		ToContractAddress:   param.ToContractAddress,
+	//		Method:              param.Method,
+	//		Args:                param.Args,
+	//	}
+	//}
 	return
 }
 
@@ -222,16 +231,6 @@ func (self *StorageLog) Deserialization(source *polycommon.ZeroCopySource) error
 }
 
 func (l *Listener) Scan(height uint64) (txs []*msg.Tx, err error) {
-	//sdk := ontSDK.NewOntologySdk()
-	//client := sdk.NewRpcClient()
-	//client.SetAddress("http://43.128.242.133:20336")
-	//
-	////ethsdk,err:=NewEthereumSdk("http://43.128.242.133:20339")
-	////if err != nil {
-	////	fmt.Println("NewEthereumSdk err:", err)
-	////	return
-	////}
-	//height := 11228
 	events, err := l.sdk.Node().GetSmartContractEventByBlock(uint32(height))
 	if err != nil {
 		fmt.Println("GetSmartContractEventByBlock err:", err)
@@ -277,15 +276,15 @@ func (l *Listener) Scan(height uint64) (txs []*msg.Tx, err error) {
 				fmt.Println("CrossChainEvent", event)
 
 				tx := &msg.Tx{
-					TxId:           msg.EncodeTxId(event.TxId),
-					TxType:         msg.SRC,
-					SrcHeight:      height,
-					SrcChainId:     5555,
-					SrcHash:        event0.TxHash,
-					DstChainId:     event.ToChainId,
-					SrcParam:       hex.EncodeToString(event.Rawdata),
-					SrcProofHeight: height,
-					SrcEvent:       event.Rawdata,
+					TxId:       msg.EncodeTxId(event.TxId),
+					TxType:     msg.SRC,
+					SrcHeight:  height,
+					SrcChainId: 5555,
+					SrcHash:    event0.TxHash,
+					DstChainId: event.ToChainId,
+					//SrcParam:       hex.EncodeToString(event.Rawdata),
+					//SrcProofHeight: height,
+					//SrcEvent:       event.Rawdata,
 				}
 				txs = append(txs, tx)
 				jsontx, _ := json.Marshal(tx)
