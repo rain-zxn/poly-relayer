@@ -282,7 +282,7 @@ func (l *Listener) Scan(height uint64) (txs []*msg.Tx, err error) {
 					SrcChainId: 5555,
 					SrcHash:    event0.TxHash,
 					DstChainId: event.ToChainId,
-					//SrcParam:       hex.EncodeToString(event.Rawdata),
+					SrcParam:   hex.EncodeToString(event.Rawdata),
 					//SrcProofHeight: height,
 					//SrcEvent:       event.Rawdata,
 				}
