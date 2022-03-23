@@ -151,6 +151,7 @@ func (l *Listener) Compose(tx *msg.Tx) (err error) {
 	}
 	fmt.Println("string(path):", ontocommon.ToHexString(path))
 	tx.SrcProof = path
+	tx.SrcProofHeight = tx.SrcHeight
 	{
 		value, _, _, _ := msg.ParseAuditPath(tx.SrcProof)
 		if len(value) == 0 {
