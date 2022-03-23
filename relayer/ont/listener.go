@@ -151,35 +151,26 @@ func (l *Listener) Compose(tx *msg.Tx) (err error) {
 	}
 	fmt.Println("string(path):", ontocommon.ToHexString(path))
 	tx.SrcProof = path
-	tx.Param = &pcom.MakeTxParam{
-		TxHash:              param.TxHash,
-		CrossChainID:        param.CrossChainID,
-		FromContractAddress: param.FromContractAddress,
-		ToChainID:           param.ToChainID,
-		ToContractAddress:   param.ToContractAddress,
-		Method:              param.Method,
-		Args:                param.Args,
+	{
+		value, _, _, _ := msg.ParseAuditPath(tx.SrcProof)
+		if len(value) == 0 {
+			return fmt.Errorf("ParseAuditPath got null param")
+		}
+		param := &ccom.MakeTxParam{}
+		err = param.Deserialization(ontocommon.NewZeroCopySource(value))
+		if err != nil {
+			return
+		}
+		tx.Param = &pcom.MakeTxParam{
+			TxHash:              param.TxHash,
+			CrossChainID:        param.CrossChainID,
+			FromContractAddress: param.FromContractAddress,
+			ToChainID:           param.ToChainID,
+			ToContractAddress:   param.ToContractAddress,
+			Method:              param.Method,
+			Args:                param.Args,
+		}
 	}
-	//{
-	//	value, _, _, _ := msg.ParseAuditPath(tx.SrcProof)
-	//	if len(value) == 0 {
-	//		return fmt.Errorf("ParseAuditPath got null param")
-	//	}
-	//	param := &ccom.MakeTxParam{}
-	//	err = param.Deserialization(ontocommon.NewZeroCopySource(value))
-	//	if err != nil {
-	//		return
-	//	}
-	//	tx.Param = &pcom.MakeTxParam{
-	//		TxHash:              param.TxHash,
-	//		CrossChainID:        param.CrossChainID,
-	//		FromContractAddress: param.FromContractAddress,
-	//		ToChainID:           param.ToChainID,
-	//		ToContractAddress:   param.ToContractAddress,
-	//		Method:              param.Method,
-	//		Args:                param.Args,
-	//	}
-	//}
 	return
 }
 
@@ -284,7 +275,7 @@ func (l *Listener) Scan(height uint64) (txs []*msg.Tx, err error) {
 					DstChainId: event.ToChainId,
 					SrcParam:   hex.EncodeToString(event.Rawdata),
 					//SrcProofHeight: height,
-					//SrcEvent:       event.Rawdata,
+					SrcEvent: event.Rawdata,
 				}
 				txs = append(txs, tx)
 				jsontx, _ := json.Marshal(tx)
