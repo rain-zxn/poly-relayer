@@ -277,13 +277,15 @@ func (l *Listener) Scan(height uint64) (txs []*msg.Tx, err error) {
 				fmt.Println("CrossChainEvent", event)
 
 				tx := &msg.Tx{
-					TxId:       msg.EncodeTxId(event.TxId),
-					TxType:     msg.SRC,
-					SrcHeight:  height,
-					SrcChainId: 5555,
-					SrcHash:    event0.TxHash,
-					DstChainId: event.ToChainId,
-					SrcParam:   hex.EncodeToString(event.Rawdata),
+					TxId:           msg.EncodeTxId(event.TxId),
+					TxType:         msg.SRC,
+					SrcHeight:      height,
+					SrcChainId:     5555,
+					SrcHash:        event0.TxHash,
+					DstChainId:     event.ToChainId,
+					SrcParam:       hex.EncodeToString(event.Rawdata),
+					SrcProofHeight: height,
+					SrcEvent:       event.Rawdata,
 				}
 				txs = append(txs, tx)
 				jsontx, _ := json.Marshal(tx)

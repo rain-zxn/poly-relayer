@@ -224,8 +224,8 @@ func (s *Submitter) submit(tx *msg.Tx) error {
 		}
 	}
 	fmt.Println("tx.SrcChainId:", tx.SrcChainId)
-	fmt.Println("tx.SrcChainId:", hex.EncodeToString(tx.SrcEvent))
-	fmt.Println("tx.SrcChainId:", uint32(tx.SrcProofHeight))
+	fmt.Println("tx.SrcChainId:", hex.EncodeToString(tx.SrcEvent)) //
+	fmt.Println("tx.SrcChainId:", uint32(tx.SrcProofHeight))       //
 	fmt.Println("tx.SrcChainId:", hex.EncodeToString(tx.SrcProof))
 	fmt.Println("tx.SrcChainId:", hex.EncodeToString(account))
 	fmt.Println("tx.SrcChainId:", hex.EncodeToString(tx.SrcStateRoot))
