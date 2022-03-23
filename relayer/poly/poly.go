@@ -20,6 +20,7 @@ package poly
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"fmt"
 	"math"
 	"strings"
@@ -222,6 +223,13 @@ func (s *Submitter) submit(tx *msg.Tx) error {
 			return nil
 		}
 	}
+	fmt.Println("tx.SrcChainId:", tx.SrcChainId)
+	fmt.Println("tx.SrcChainId:", hex.EncodeToString(tx.SrcEvent))
+	fmt.Println("tx.SrcChainId:", uint32(tx.SrcProofHeight))
+	fmt.Println("tx.SrcChainId:", hex.EncodeToString(tx.SrcProof))
+	fmt.Println("tx.SrcChainId:", hex.EncodeToString(account))
+	fmt.Println("tx.SrcChainId:", hex.EncodeToString(tx.SrcStateRoot))
+	fmt.Println("tx.SrcChainId:", s.signer.Address)
 
 	t, err := s.sdk.Node().Native.Ccm.ImportOuterTransfer(
 		tx.SrcChainId,
