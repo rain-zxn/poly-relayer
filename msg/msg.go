@@ -87,6 +87,7 @@ type Tx struct {
 	SkipCheckFee            bool                  `json:",omitempty"`
 	Skipped                 bool                  `json:",omitempty"`
 	CheckFeeStatus          bridge.CheckFeeStatus `json:",omitempty"`
+	PaidGas                 float64               `json:",omitempty"`
 }
 
 func (tx *Tx) Type() TxType {

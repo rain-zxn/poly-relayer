@@ -23,6 +23,7 @@ import (
 	"github.com/polynetwork/poly-relayer/bus"
 	"github.com/polynetwork/poly-relayer/config"
 	"github.com/polynetwork/poly-relayer/msg"
+	"github.com/polynetwork/bridge-common/chains/bridge"
 )
 
 type Submitter struct {
@@ -74,6 +75,19 @@ func (s *Submitter) Submit(msg msg.Message) error {
 func (s *Submitter) submit(tx *msg.Tx) error {
 	if len(tx.DstData) == 0 {
 		return nil
+	}
+	if tx.CheckFeeStatus != bridge.FREE && !tx.SkipFee() {
+		needGasPrice,needGasLimit, err := s.wallet.EstimateGas(s.ccm, tx.DstData)
+		if err != nil {
+			log.Info("err get EstimateGas", "tx.PolyHash", tx.PolyHash)
+			return fmt.Errorf("get EstimateGas err")
+		}
+		paidGas := uint64(tx.PaidGas)
+		needGas := new(big.Int).Mul(needGasPrice,new(big.Int).SetUint64(needGasLimit)).Uint64()
+		if paidGas < needGas {
+			log.Info("err checkgas", "paidGas", paidGas, "needGas", needGas, "tx.PolyHash", tx.PolyHash)
+			return fmt.Errorf("checkgas err")
+		}
 	}
 	var (
 		gasPrice  *big.Int
@@ -193,6 +207,10 @@ func (s *Submitter) ProcessTx(m *msg.Tx, compose msg.PolyComposer) (err error) {
 			err = fmt.Errorf("%w tx exec error %v", msg.ERR_TX_EXEC_FAILURE, err)
 		} else if strings.Contains(info, "always failing") {
 			err = fmt.Errorf("%w tx exec error %v", msg.ERR_TX_EXEC_ALWAYS_FAIL, err)
+		} else if strings.Contains(info, "get EstimateGas err") {
+			err = msg.ERR_TX_CHECK_ESTIMATEGAS
+		} else if strings.Contains(info, "checkgas err") {
+			err = msg.ERR_TX_CHECK_GAS
 		}
 	}
 	return
@@ -242,7 +260,13 @@ func (s *Submitter) run(account accounts.Account, mq bus.TxBus, delay bus.Delaye
 			}
 			tx.Attempts++
 			// TODO: retry with increased gas price?
-			if errors.Is(err, msg.ERR_TX_EXEC_FAILURE) {
+			if errors.Is(err, msg.ERR_TX_CHECK_ESTIMATEGAS) {
+				tsp := time.Now().Unix() + 10
+				bus.SafeCall(s.Context, tx, "push to delay queue", func() error { return delay.Delay(context.Background(), tx, tsp) })
+			} else if errors.Is(err, msg.ERR_TX_CHECK_GAS) {
+				tsp := time.Now().Unix() + 60*10
+				bus.SafeCall(s.Context, tx, "push to delay queue", func() error { return delay.Delay(context.Background(), tx, tsp) })
+			} else if errors.Is(err, msg.ERR_TX_EXEC_FAILURE) {
 				tsp := time.Now().Unix() + 60*3
 				bus.SafeCall(s.Context, tx, "push to delay queue", func() error { return delay.Delay(context.Background(), tx, tsp) })
 			} else if errors.Is(err, msg.ERR_FEE_CHECK_FAILURE) {
