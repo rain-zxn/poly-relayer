@@ -12,7 +12,7 @@ require (
 	github.com/ontio/ontology v1.11.1-0.20200812075204-26cf1fa5dd47
 	github.com/ontio/ontology-crypto v1.0.9
 	github.com/ontio/ontology-go-sdk v1.11.4
-	github.com/polynetwork/bridge-common v0.0.24-ok
+	github.com/polynetwork/bridge-common v1.111.1-main
 	github.com/polynetwork/poly v1.3.1
 	github.com/polynetwork/poly-go-sdk v0.0.0-20210114035303-84e1615f4ad4
 	github.com/tendermint/tendermint v0.33.9
@@ -27,5 +27,6 @@ replace (
 	github.com/polynetwork/poly => github.com/zhiqiangxu/poly v0.0.0-20210512064417-e8c8ac7678d4
 	github.com/tendermint/iavl => github.com/okex/iavl v0.14.3-exchain
 	github.com/tendermint/tendermint => github.com/okex/tendermint v0.33.9-exchain6
+	github.com/polynetwork/bridge-common v1.111.1-main => github.com/rain-zxn/bridge-common v0.0.21-0.20220601182942-6644047fcdba
 )
 
