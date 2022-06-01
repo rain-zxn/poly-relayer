@@ -31,4 +31,7 @@ var (
 	ERR_HEADER_SUBMIT_FAILURE = errors.New("Header submit failure")
 	ERR_TX_EXEC_ALWAYS_FAIL   = errors.New("Tx exec always fail")
 	ERR_LOW_BALANCE           = errors.New("Insufficient balance")
+
+	ERR_TX_GET_ESTIMATEGAS 	  = errors.New("Tx get estimategas err")
+	ERR_TX_CHECK_GAS          = errors.New("Tx check gas err")
 )
