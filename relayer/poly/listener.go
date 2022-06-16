@@ -20,6 +20,7 @@ package poly
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/polynetwork/bridge-common/base"
@@ -60,7 +61,7 @@ func (l *Listener) Scan(height uint64) (txs []*msg.Tx, err error) {
 					continue
 				}
 				method, _ := states[0].(string)
-				if method != "makeProof" {
+				if method != "makeProof" && method != "multisignedTxJson" {
 					continue
 				}
 
@@ -71,16 +72,23 @@ func (l *Listener) Scan(height uint64) (txs []*msg.Tx, err error) {
 				}
 
 				tx := new(msg.Tx)
+				tx.SrcChainId = uint64(states[1].(float64))
 				tx.DstChainId = dstChain
-				tx.PolyKey = states[5].(string)
 				tx.PolyHeight = uint32(height)
 				tx.PolyHash = event.TxHash
 				tx.TxType = msg.POLY
 				tx.TxId = states[3].(string)
-				tx.SrcChainId = uint64(states[1].(float64))
-				switch tx.SrcChainId {
-				case base.NEO, base.NEO3, base.ONT:
-					tx.TxId = util.ReverseHex(tx.TxId)
+				switch method {
+				case "makeProof":
+					tx.PolyKey = states[5].(string)
+					switch tx.SrcChainId {
+					case base.NEO, base.NEO3, base.ONT:
+						tx.TxId = util.ReverseHex(tx.TxId)
+					}
+				case "multisignedTxJson":
+					sequence := states[5].(float64)
+					tx.PolyKey = strconv.Itoa(int(sequence))
+					tx.PolySigs = []byte(states[4].(string))
 				}
 				txs = append(txs, tx)
 			}

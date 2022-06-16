@@ -161,27 +161,31 @@ func RelayTx(ctx *cli.Context) (err error) {
 		if hash == "" || util.LowerHex(hash) == util.LowerHex(txHash) {
 			log.Info("Found patch target tx", "hash", txHash, "height", height)
 			if chain == base.POLY {
-				tx.CapturePatchParams(params)
-				if !free {
-					if bridge == nil {
-						bridge, err = Bridge()
+				switch tx.DstChainId {
+				case base.RIPPLE:
+				default:
+					tx.CapturePatchParams(params)
+					if !free {
+						if bridge == nil {
+							bridge, err = Bridge()
+							if err != nil {
+								log.Error("Failed to init bridge sdk")
+								continue
+							}
+						}
+						res, err := CheckFee(bridge, tx)
 						if err != nil {
-							log.Error("Failed to init bridge sdk")
+							log.Error("Failed to call check fee", "poly_hash", tx.PolyHash)
 							continue
 						}
-					}
-					res, err := CheckFee(bridge, tx)
-					if err != nil {
-						log.Error("Failed to call check fee", "poly_hash", tx.PolyHash)
-						continue
-					}
-					if res.Pass() {
-						log.Info("Check fee pass", "poly_hash", tx.PolyHash)
-					} else {
-						log.Info("Check fee failed", "poly_hash", tx.PolyHash)
-						fmt.Println(util.Verbose(tx))
-						fmt.Println(res)
-						continue
+						if res.Pass() {
+							log.Info("Check fee pass", "poly_hash", tx.PolyHash)
+						} else {
+							log.Info("Check fee failed", "poly_hash", tx.PolyHash)
+							fmt.Println(util.Verbose(tx))
+							fmt.Println(res)
+							continue
+						}
 					}
 				}
 				sub, err := ChainSubmitter(tx.DstChainId)
