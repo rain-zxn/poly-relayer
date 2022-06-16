@@ -88,7 +88,7 @@ func (l *Listener) Scan(height uint64) (txs []*msg.Tx, err error) {
 				case "multisignedTxJson":
 					sequence := states[5].(float64)
 					tx.PolyKey = strconv.Itoa(int(sequence))
-					tx.PolySigs = []byte(states[4].(string))
+					tx.ChainTxJson = states[4].(string)
 				}
 				txs = append(txs, tx)
 			}

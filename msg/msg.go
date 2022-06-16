@@ -94,6 +94,8 @@ type Tx struct {
 	Skipped                 bool                  `json:",omitempty"`
 	CheckFeeStatus          bridge.CheckFeeStatus `json:",omitempty"`
 
+	ChainTxJson	string        `json:",omitempty"`
+
 	Extra interface{} `json:"-"`
 }
 
