@@ -171,6 +171,7 @@ func (s *Submitter) processPolyTx(tx *msg.Tx) (err error) {
 	if err != nil {
 		return fmt.Errorf("%s failed to decode audit path %v", s.name, err)
 	}
+	log.Info("verifyHeaderAndExecuteTx info", "proof", tx.AuditPath, "rawHeader", hex.EncodeToString(tx.PolyHeader.GetMessage()), "headerProof", tx.AnchorProof, "curRawHeader", hex.EncodeToString(anchor), "headerSig", hex.EncodeToString(tx.PolySigs))
 	tx.DstData, err = s.abi.Pack("verifyHeaderAndExecuteTx", path, tx.PolyHeader.GetMessage(), proof, anchor, tx.PolySigs)
 	if err != nil {
 		err = fmt.Errorf("%s processPolyTx pack tx error %v", s.name, err)
