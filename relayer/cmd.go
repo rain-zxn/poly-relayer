@@ -269,6 +269,15 @@ func relayTx(chain, height uint64, hash, sender string, free bool, price, pricex
 					log.Error("Failed to process tx", "chain", tx.DstChainId, "err", err)
 					continue
 				}
+				log.Info("start MerkleValue")
+				if tx.MerkleValue != nil && tx.MerkleValue.MakeTxParam != nil {
+					log.Info("MerkleValue", "Method", tx.MerkleValue.MakeTxParam.Method)
+					log.Info("MerkleValue", "ToContractAddress", hex.EncodeToString(tx.MerkleValue.MakeTxParam.ToContractAddress))
+					log.Info("MerkleValue", "FromContractAddress", hex.EncodeToString(tx.MerkleValue.MakeTxParam.FromContractAddress))
+					log.Info("MerkleValue", "CrossChainID", hex.EncodeToString(tx.MerkleValue.MakeTxParam.CrossChainID))
+					log.Info("MerkleValue", "ToChainID", tx.MerkleValue.MakeTxParam.ToChainID)
+					log.Info("MerkleValue", "Args", hex.EncodeToString(tx.MerkleValue.MakeTxParam.Args))
+				}
 				err = sub.SubmitTx(tx)
 				log.Info("Submtter patching poly tx", "hash", txHash, "chain", tx.DstChainId, "err", err)
 			} else {
