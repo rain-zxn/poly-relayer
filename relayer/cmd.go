@@ -277,6 +277,8 @@ func relayTx(chain, height uint64, hash, sender string, free bool, price, pricex
 					log.Info("MerkleValue", "CrossChainID", hex.EncodeToString(tx.MerkleValue.MakeTxParam.CrossChainID))
 					log.Info("MerkleValue", "ToChainID", tx.MerkleValue.MakeTxParam.ToChainID)
 					log.Info("MerkleValue", "Args", hex.EncodeToString(tx.MerkleValue.MakeTxParam.Args))
+					log.Info("MerkleValue", "Args1", tx.MerkleValue.MakeTxParam.Args)
+					log.Info("MerkleValue", "len Args1", len(tx.MerkleValue.MakeTxParam.Args))
 				}
 				err = sub.SubmitTx(tx)
 				log.Info("Submtter patching poly tx", "hash", txHash, "chain", tx.DstChainId, "err", err)
