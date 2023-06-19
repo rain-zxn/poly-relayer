@@ -177,8 +177,8 @@ func (s *Submitter) ComposePolyHeaderProof(tx *msg.Tx) (err error) {
 	if tx.PolyHeight < tx.DstPolyEpochStartHeight {
 		anchorHeight = tx.DstPolyEpochStartHeight + 1
 	} else {
-		isEpoch, _, e := s.CheckEpoch(tx, tx.PolyHeader)
 		return nil
+		isEpoch, _, e := s.CheckEpoch(tx, tx.PolyHeader)
 		if e != nil {
 			return e
 		}
@@ -218,6 +218,7 @@ func (s *Submitter) CheckEpoch(tx *msg.Tx, hdr *types.Header) (epoch bool, pubKe
 		err = fmt.Errorf("CheckEpoch consensus payload unmarshal error %v", err)
 		return
 	}
+
 	var bks []keypair.PublicKey
 	for _, peer := range info.NewChainConfig.Peers {
 		keyStr, _ := hex.DecodeString(peer.ID)
