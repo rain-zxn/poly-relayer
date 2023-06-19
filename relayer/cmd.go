@@ -39,7 +39,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 
 	"github.com/polynetwork/bridge-common/base"
-	"github.com/polynetwork/bridge-common/chains/bridge"
 	"github.com/polynetwork/bridge-common/chains/poly"
 	"github.com/polynetwork/bridge-common/log"
 	"github.com/polynetwork/bridge-common/util"
@@ -191,97 +190,99 @@ func relayTx(chain, height uint64, hash, sender string, free bool, price, pricex
 	if err != nil {
 		return
 	}
-	var listener IChainListener
-	if chain == 0 {
-		listener, err = PolyListener()
-	} else {
-		listener, err = ChainListener(chain, ps.SDK())
-	}
-	if err != nil {
-		return
-	}
-	if height == 0 && hash != "" {
-		height, err = listener.GetTxBlock(hash)
-		if err != nil {
-			log.Error("Failed to get tx block", "hash", hash)
+
+	//listener.Scan(58710767)
+	/*
+		if height == 0 && hash != "" {
+			height, err = listener.GetTxBlock(hash)
+			if err != nil {
+				log.Error("Failed to get tx block", "hash", hash)
+				return
+			}
+		}
+
+		if height == 0 {
+			log.Error("Failed to patch tx for height is invalid")
 			return
 		}
-	}
 
-	if height == 0 {
-		log.Error("Failed to patch tx for height is invalid")
-		return
-	}
-
-	txs, err := listener.Scan(height)
-	if err != nil {
-		log.Error("Fetch block txs error", "height", height, "err", err)
-		return
-	}
-
-	count := 0
-	var bridge *bridge.SDK
-	for _, tx := range txs {
-		txHash := tx.SrcHash
-		if chain == base.POLY {
-			txHash = tx.PolyHash
+		txs, err := listener.Scan(height)
+		if err != nil {
+			log.Error("Fetch block txs error", "height", height, "err", err)
+			return
 		}
-		if hash == "" || util.LowerHex(hash) == util.LowerHex(txHash) {
-			log.Info("Found patch target tx", "hash", txHash, "height", height)
-			targetTxs = append(targetTxs, tx)
+
+
+
+		count := 0
+		var bridge *bridge.SDK
+		for _, tx := range txs {
+			txHash := tx.SrcHash
 			if chain == base.POLY {
-				switch tx.DstChainId {
-				case base.RIPPLE:
-				default:
-					tx.CapturePatchParams(params)
-					if !free {
-						if bridge == nil {
-							bridge, err = Bridge()
+				txHash = tx.PolyHash
+			}
+			if hash == "" || util.LowerHex(hash) == util.LowerHex(txHash) {
+				log.Info("Found patch target tx", "hash", txHash, "height", height)
+				targetTxs = append(targetTxs, tx)
+				if chain == base.POLY {
+					switch tx.DstChainId {
+					case base.RIPPLE:
+					default:
+						tx.CapturePatchParams(params)
+						if !free {
+							if bridge == nil {
+								bridge, err = Bridge()
+								if err != nil {
+									log.Error("Failed to init bridge sdk")
+									continue
+								}
+							}
+							res, err := CheckFee(bridge, tx)
 							if err != nil {
-								log.Error("Failed to init bridge sdk")
+								log.Error("Failed to call check fee", "poly_hash", tx.PolyHash)
+								continue
+							}
+							if res.Pass() {
+								log.Info("Check fee pass", "poly_hash", tx.PolyHash)
+							} else if res.PaidLimit() {
+								log.Info("Check fee got paid with limit", "poly_hash", tx.PolyHash)
+							} else {
+								log.Info("Check fee failed", "poly_hash", tx.PolyHash)
+								fmt.Println(util.Verbose(tx))
+								fmt.Println(res)
 								continue
 							}
 						}
-						res, err := CheckFee(bridge, tx)
-						if err != nil {
-							log.Error("Failed to call check fee", "poly_hash", tx.PolyHash)
-							continue
-						}
-						if res.Pass() {
-							log.Info("Check fee pass", "poly_hash", tx.PolyHash)
-						} else if res.PaidLimit() {
-							log.Info("Check fee got paid with limit", "poly_hash", tx.PolyHash)
-						} else {
-							log.Info("Check fee failed", "poly_hash", tx.PolyHash)
-							fmt.Println(util.Verbose(tx))
-							fmt.Println(res)
-							continue
-						}
 					}
-				}
-				sub, err := ChainSubmitter(tx.DstChainId)
-				if err != nil {
-					log.Error("Failed to init chain submitter", "chain", tx.DstChainId, "err", err)
-					continue
-				}
-				err = sub.ProcessTx(tx, ps.ComposeTx)
-				if err != nil {
-					log.Error("Failed to process tx", "chain", tx.DstChainId, "err", err)
-					continue
-				}
-				err = sub.SubmitTx(tx)
-				log.Info("Submtter patching poly tx", "hash", txHash, "chain", tx.DstChainId, "err", err)
-			} else {
-				err = ps.ProcessTx(tx, listener)
-				log.Info("Submtter patching src tx", "hash", txHash, "chain", tx.SrcChainId, "err", err)
-			}
-			fmt.Println(util.Verbose(tx))
-			count++
-		} else {
-			log.Info("Found tx in block not targeted", "hash", txHash, "height", height)
-		}
+	*/
+	tx := new(msg.Tx)
+	tx.PolyHeight = 58710767
+	tx.DstChainId = base.BSC
+	sub, err := ChainSubmitter(base.BSC)
+	if err != nil {
+		log.Error("Failed to init chain submitter", "chain", base.BSC, "err", err)
 	}
-	log.Info("Patched txs per request", "count", count)
+
+	err = sub.ProcessTx(tx, ps.ComposeTx)
+	if err != nil {
+		log.Error("Failed to process tx", "chain", tx.DstChainId, "err", err)
+	}
+	/*
+					err = sub.SubmitTx(tx)
+					log.Info("Submtter patching poly tx", "hash", txHash, "chain", tx.DstChainId, "err", err)
+				} else {
+					err = ps.ProcessTx(tx, listener)
+					log.Info("Submtter patching src tx", "hash", txHash, "chain", tx.SrcChainId, "err", err)
+				}
+				fmt.Println(util.Verbose(tx))
+				count++
+			} else {
+				log.Info("Found tx in block not targeted", "hash", txHash, "height", height)
+			}
+		}
+
+	*/
+	log.Info("Patched txs per request")
 	return
 }
 

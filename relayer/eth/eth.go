@@ -171,6 +171,8 @@ func (s *Submitter) processPolyTx(tx *msg.Tx) (err error) {
 	if err != nil {
 		return fmt.Errorf("%s failed to decode audit path %v", s.name, err)
 	}
+	fmt.Println("tx.PolyHeader.GetMessage()", hex.EncodeToString(tx.PolyHeader.GetMessage()))
+	fmt.Println("tx.PolySigs", hex.EncodeToString(tx.PolySigs))
 	tx.DstData, err = s.abi.Pack("verifyHeaderAndExecuteTx", path, tx.PolyHeader.GetMessage(), proof, anchor, tx.PolySigs)
 	if err != nil {
 		err = fmt.Errorf("%s processPolyTx pack tx error %v", s.name, err)
@@ -180,13 +182,13 @@ func (s *Submitter) processPolyTx(tx *msg.Tx) (err error) {
 }
 
 func (s *Submitter) ProcessTx(m *msg.Tx, compose msg.PolyComposer) (err error) {
-	if m.Type() != msg.POLY {
-		return fmt.Errorf("%s desired message is not poly tx %v", m.Type())
-	}
-
-	if m.DstChainId != s.config.ChainId {
-		return fmt.Errorf("%s message dst chain does not match %v", m.DstChainId)
-	}
+	//if m.Type() != msg.POLY {
+	//	return fmt.Errorf("%s desired message is not poly tx %v", m.Type())
+	//}
+	//
+	//if m.DstChainId != s.config.ChainId {
+	//	return fmt.Errorf("%s message dst chain does not match %v", m.DstChainId)
+	//}
 	m.DstPolyEpochStartHeight, err = s.GetPolyEpochStartHeight()
 	if err != nil {
 		return fmt.Errorf("%s fetch dst chain poly epoch height error %v", s.name, err)

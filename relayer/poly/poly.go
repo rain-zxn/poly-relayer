@@ -20,6 +20,7 @@ package poly
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strings"
@@ -285,6 +286,7 @@ func (s *Submitter) CollectSigs(tx *msg.Tx) (err error) {
 		sigs = append(sigs, s...)
 	}
 	tx.PolySigs = sigs
+	fmt.Println("tx.PolySigs", hex.EncodeToString(tx.PolySigs))
 	return
 }
 

@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ontio/ontology-crypto/keypair"
 	vconf "github.com/ontio/ontology/consensus/vbft/config"
@@ -19,7 +18,6 @@ import (
 	"github.com/polynetwork/poly/core/types"
 	ccom "github.com/polynetwork/poly/native/service/cross_chain_manager/common"
 
-	"github.com/polynetwork/poly-relayer/config"
 	"github.com/polynetwork/poly-relayer/msg"
 )
 
@@ -118,25 +116,32 @@ func (s *Submitter) GetPolyParams(tx *msg.Tx) (param *ccom.ToMerkleValue, path s
 }
 
 func (s *Submitter) ComposeTx(tx *msg.Tx) (err error) {
-	if tx.PolyHash == "" {
+
+	/*if tx.PolyHash == "" {
 		return fmt.Errorf("ComposeTx: Invalid poly hash")
 	}
-	/*
-		if tx.DstPolyEpochStartHeight == 0 {
-			return fmt.Errorf("ComposeTx: Dst chain poly height not specified")
-		}
-	*/
 
-	if tx.PolyHeight == 0 {
-		tx.PolyHeight, err = s.sdk.Node().GetBlockHeightByTxHash(tx.PolyHash)
-		if err != nil {
-			return
+	*/
+	/*
+			if tx.DstPolyEpochStartHeight == 0 {
+				return fmt.Errorf("ComposeTx: Dst chain poly height not specified")
+			}
+
+
+
+		if tx.PolyHeight == 0 {
+			tx.PolyHeight, err = s.sdk.Node().GetBlockHeightByTxHash(tx.PolyHash)
+			if err != nil {
+				return
+			}
 		}
-	}
+
+	*/
 	tx.PolyHeader, err = s.sdk.Node().GetHeaderByHeight(tx.PolyHeight + 1)
 	if err != nil {
 		return err
 	}
+	fmt.Println("tx.PolyHeader", hex.EncodeToString(tx.PolyHeader.GetMessage()))
 
 	if tx.DstChainId != base.ONT && tx.DstChainId != base.FLOW {
 		err = s.ComposePolyHeaderProof(tx)
@@ -145,25 +150,25 @@ func (s *Submitter) ComposeTx(tx *msg.Tx) (err error) {
 		}
 	}
 
-	tx.MerkleValue, tx.AuditPath, _, err = s.GetPolyParams(tx)
-	if err != nil {
-		return err
-	}
-
-	if tx.MerkleValue.MakeTxParam == nil || !config.CONFIG.AllowMethod(tx.MerkleValue.MakeTxParam.Method) {
-		method := "missing param"
-		if tx.MerkleValue.MakeTxParam != nil {
-			method = tx.MerkleValue.MakeTxParam.Method
-		}
-		return fmt.Errorf("%w Invalid poly tx, src chain(%v) tx(%s) method(%s)", msg.ERR_INVALID_TX, tx.SrcChainId, tx.PolyHash, method)
-	}
-
-	tx.SrcProxy = common.BytesToAddress(tx.MerkleValue.MakeTxParam.FromContractAddress).String()
-	tx.DstProxy = common.BytesToAddress(tx.MerkleValue.MakeTxParam.ToContractAddress).String()
-
-	if tx.DstChainId != base.ONT {
-		return s.CollectSigs(tx)
-	}
+	//tx.MerkleValue, tx.AuditPath, _, err = s.GetPolyParams(tx)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//if tx.MerkleValue.MakeTxParam == nil || !config.CONFIG.AllowMethod(tx.MerkleValue.MakeTxParam.Method) {
+	//	method := "missing param"
+	//	if tx.MerkleValue.MakeTxParam != nil {
+	//		method = tx.MerkleValue.MakeTxParam.Method
+	//	}
+	//	return fmt.Errorf("%w Invalid poly tx, src chain(%v) tx(%s) method(%s)", msg.ERR_INVALID_TX, tx.SrcChainId, tx.PolyHash, method)
+	//}
+	//
+	//tx.SrcProxy = common.BytesToAddress(tx.MerkleValue.MakeTxParam.FromContractAddress).String()
+	//tx.DstProxy = common.BytesToAddress(tx.MerkleValue.MakeTxParam.ToContractAddress).String()
+	//
+	//if tx.DstChainId != base.ONT {
+	return s.CollectSigs(tx)
+	//}
 	return
 }
 
@@ -173,6 +178,7 @@ func (s *Submitter) ComposePolyHeaderProof(tx *msg.Tx) (err error) {
 		anchorHeight = tx.DstPolyEpochStartHeight + 1
 	} else {
 		isEpoch, _, e := s.CheckEpoch(tx, tx.PolyHeader)
+		return nil
 		if e != nil {
 			return e
 		}
@@ -199,13 +205,13 @@ func (s *Submitter) CheckEpoch(tx *msg.Tx, hdr *types.Header) (epoch bool, pubKe
 	if tx.DstChainId == base.NEO {
 		return
 	}
-	if len(tx.DstPolyKeepers) == 0 {
-		// err = fmt.Errorf("Dst chain poly keeper not provided")
-		return
-	}
-	if hdr.NextBookkeeper == pcom.ADDRESS_EMPTY {
-		return
-	}
+	//if len(tx.DstPolyKeepers) == 0 {
+	//	// err = fmt.Errorf("Dst chain poly keeper not provided")
+	//	return
+	//}
+	//if hdr.NextBookkeeper == pcom.ADDRESS_EMPTY {
+	//	return
+	//}
 	info := &vconf.VbftBlockInfo{}
 	err = json.Unmarshal(hdr.ConsensusPayload, info)
 	if err != nil {
@@ -236,5 +242,7 @@ func (s *Submitter) CheckEpoch(tx *msg.Tx, hdr *types.Header) (epoch bool, pubKe
 		sink.WriteVarBytes(crypto.Keccak256(bytes[1:])[12:])
 	}
 	epoch = !bytes.Equal(tx.DstPolyKeepers, sink.Bytes())
+	fmt.Println("pubKeys", hex.EncodeToString(pubKeys))
+	fmt.Println("sink", hex.EncodeToString(sink.Bytes()))
 	return
 }
