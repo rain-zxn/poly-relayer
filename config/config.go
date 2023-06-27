@@ -91,7 +91,9 @@ func New(path string) (config *Config, err error) {
 		} else {
 			passphrase, err = msg.ReadPassword("passphrase")
 		}
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 		data = msg.Decrypt(data, passphrase)
 	}
 	config = &Config{chains: map[uint64]bool{}}
