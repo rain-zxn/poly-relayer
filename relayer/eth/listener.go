@@ -99,7 +99,7 @@ func (l *Listener) getProofHeight(txHeight uint64) (height uint64, err error) {
 		}
 		height = height - 2
 
-	case base.PLT, base.BCSPALETTE, base.BCSPALETTE2:
+	case base.PLT, base.PLT2, base.BCSPALETTE, base.BCSPALETTE2:
 		height, err = l.sdk.Node().GetLatestHeight()
 		if err != nil {
 			return 0, err
