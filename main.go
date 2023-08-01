@@ -573,6 +573,9 @@ func Init(ctx *cli.Context) (err error) {
 	config.WALLET_PATH = ctx.String("wallet")
 	config.CONFIG_PATH = ctx.String("config")
 
-	log.Init()
+	log.Init(&log.LogConfig{
+		Path:     ctx.String("log"),
+		MaxFiles: ctx.Uint("logmaxfiles"),
+		MaxSize:  ctx.Uint("logmaxsize")})
 	return
 }
